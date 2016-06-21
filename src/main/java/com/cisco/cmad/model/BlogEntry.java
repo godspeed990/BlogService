@@ -14,7 +14,7 @@ import org.mongodb.morphia.annotations.*;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
-@Entity("comment")
+@Entity("blogs")
 @Indexes({
     @Index(fields = @Field("tags")),
     @Index(fields = @Field("userId"))
@@ -33,7 +33,6 @@ public class BlogEntry {
 		DateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd G 'at' hh:mm:ss z");
 		@Embedded
 		private ArrayList<Comment> comment= new ArrayList<Comment>();
-		@Reference
 		private ObjectId userId ;
 		
 		 public BlogEntry(Optional<ObjectId> id, String content, String title, String tags, 

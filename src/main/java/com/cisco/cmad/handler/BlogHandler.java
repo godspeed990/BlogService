@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Optional;
 import org.bson.types.ObjectId;
 import com.cisco.cmad.model.*;
-import com.cisco.cmad.dao.*;
+import com.cisco.cmad.Service.BlogService;
+import java.util.Base64;
 import io.vertx.core.eventbus.EventBus;
-import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -19,11 +19,10 @@ import com.google.inject.Inject;
 
 public class BlogHandler {
 	
-	  @Inject BlogDAO blogDAO;
 
 	  Logger logger = LoggerFactory.getLogger(BlogHandler.class);
-	  BlogDAO blogDao;
-
+	    @Inject BlogService blogService;
+	    
 		private EventBus eventBus;
 
 public void getBlogs(RoutingContext rc) {
@@ -31,19 +30,21 @@ public void getBlogs(RoutingContext rc) {
    if (logger.isDebugEnabled()) {
       logger.debug("Tag search ? , tag :" + queryParam);
    }
-   String userName = "";
-   String password = "";
+   String authorization = rc.request().getHeader("Authorization");
+   
+   String userName = Base64.getDecoder().decode(authorization.substring(0,authorization.indexOf(":"))).toString();
+   String password = Base64.getDecoder().decode(authorization.substring(authorization.indexOf(":")+1)).toString();
    
    try{	        
-	   eventBus.send("com.cisco.cmad.user.authenticate",new JsonObject().put("userName",userName).put("password","abc123"),resp->{
+	   eventBus.send("com.cisco.cmad.user.authenticate",new JsonObject().put("userName",userName).put("password",password),resp->{
 		   rc.vertx().executeBlocking(future -> {
 		   try {
 			   List<BlogEntry> blogList;
 	          if (queryParam != null && queryParam.trim().length() > 0) {
-	           blogList = blogDao.getBlogs(Optional.ofNullable(queryParam));	            
+	           blogList = blogService.getBlogs(Optional.ofNullable(queryParam));	            
 	          } else {
 	                    //get all blogs
-	            blogList = blogDao.getBlogs(Optional.empty());
+	            blogList = blogService.getBlogs(Optional.empty());
 	          }
 	          future.complete(Json.encodePrettily(blogList));
 		   } catch (Exception ex) {
@@ -59,7 +60,7 @@ public void getBlogs(RoutingContext rc) {
     		   eventBus.send("com.cisco.cmad.user.info",new JsonObject().put("userId",blogs.get(i).getUserId()),response->{
     			   if (response.succeeded()){
     				   Object respObj = response.result();
-    				   JsonObject JsonObj = (JsonObject) obj;
+    				   JsonObject JsonObj = (JsonObject) respObj;
     				   rc.response().write(Json.encode(temp.put("userName",JsonObj.getString("userName"))
     						   .put("firstName",JsonObj.getString("firstName"))
     						   .put("lastName",JsonObj.getString("lastName")))   						   
@@ -94,9 +95,11 @@ public JsonArray getUserInfo(List<BlogEntry> blogs){
 }
 public void storeBlog(RoutingContext rc) {
   String jSonString = rc.getBodyAsString(); //get JSON body as String
+  String authorization = rc.request().getHeader("Authorization");
   
-  String userName = "";
-  String password = "";
+  String userName = Base64.getDecoder().decode(authorization.substring(0,authorization.indexOf(":"))).toString();
+  String password = Base64.getDecoder().decode(authorization.substring(authorization.indexOf(":")+1)).toString();
+
   if (logger.isDebugEnabled())
      logger.debug("JSON String from POST " + jSonString);
 
@@ -105,12 +108,12 @@ public void storeBlog(RoutingContext rc) {
   if (logger.isDebugEnabled())
      logger.debug("RegistrationDTO object after json Decode : " + blog);
 try{	        
-  eventBus.send("com.cisco.cmad.user.authenticate",new JsonObject().put("userName",userName).put("password","abc123"),response->{
+  eventBus.send("com.cisco.cmad.user.authenticate",new JsonObject().put("userName",userName).put("password",password),response->{
 	  if (response.succeeded()){
 		  JsonObject resp = (JsonObject) response.result().body();
 		  if (resp.getString("userId")!=null){
 			  blog.setUserId(new ObjectId(resp.getString("userId")));
-			  blogDAO.save(blog);
+			  blogService.storeBlog(blog);
               if (logger.isDebugEnabled())
                   logger.debug("Blog stored successfully");
 		  }
@@ -137,18 +140,23 @@ catch (Exception e){
 public void submitComment(RoutingContext rc) {
   String jSonString = rc.getBodyAsString(); 
   String blogId = rc.request().getParam("blogId");
+
   if (logger.isDebugEnabled())
     logger.debug("JSON String from POST " + jSonString + " Blog Id :" + blogId);
     Comment comment = Json.decodeValue(jSonString, Comment.class);
-  String userName = "";
+    String authorization = rc.request().getHeader("Authorization");
+    
+    String userName = Base64.getDecoder().decode(authorization.substring(0,authorization.indexOf(":"))).toString();
+    String password = Base64.getDecoder().decode(authorization.substring(authorization.indexOf(":")+1)).toString();
+
   if (logger.isDebugEnabled())
     logger.debug("Comment object : " + comment);
-  	eventBus.send("com.cisco.cmad.user.authenticate",new JsonObject().put("userName",userName).put("password","abc123"),response->{
+  	eventBus.send("com.cisco.cmad.user.authenticate",new JsonObject().put("userName",userName).put("password",password),response->{
 		if (response.succeeded()){
 			JsonObject resp = (JsonObject) response.result().body();
 			if (resp.getString("userId")!=null){
 				comment.setUserId(new ObjectId(resp.getString("userId")));
-				blogDAO.submitComments(blogId, comment);
+				blogService.updateBlogWithComments(blogId, comment);
 				if (logger.isDebugEnabled())
                 logger.debug("Comment updated in blog successfully");
 				}

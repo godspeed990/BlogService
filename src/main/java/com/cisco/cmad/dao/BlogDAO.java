@@ -1,5 +1,6 @@
 package com.cisco.cmad.dao;
 import com.cisco.cmad.model.*;
+import com.google.inject.Inject;
 import com.mongodb.MongoClient;
 
 import java.util.List;
@@ -15,12 +16,10 @@ import org.mongodb.morphia.query.UpdateOperations;
 
 public class BlogDAO extends BasicDAO<BlogEntry, ObjectId>{
 
-	public BlogDAO(Class<BlogEntry> entityClass, Datastore ds,Morphia morphia, MongoClient mongoClient) {
-		super(entityClass, ds);
-		// TODO Auto-generated constructor stub
-	}
+	@Inject
     public BlogDAO(Datastore ds) {
         super(ds);
+        
     }
     public List<BlogEntry> getBlogs(Optional<String> searchKeyword) {
         return  searchKeyword.map( tag -> {

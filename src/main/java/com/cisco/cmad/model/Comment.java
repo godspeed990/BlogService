@@ -27,7 +27,6 @@ public class Comment {
 		DateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd G 'at' hh:mm:ss zs");
 		@Reference("blogs")
 		private ArrayList<Comment> comment= new ArrayList<Comment>();
-		@Reference
 		private ObjectId userId ;
 		
 		 public Comment(ObjectId id, String content, ObjectId userId) {
