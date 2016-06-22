@@ -17,6 +17,7 @@ import io.vertx.core.logging.LoggerFactory;
 import io.vertx.core.net.JksOptions;
 import io.vertx.core.spi.cluster.ClusterManager;
 import io.vertx.ext.web.Router;
+import io.vertx.ext.web.handler.StaticHandler;
 import io.vertx.spi.cluster.hazelcast.HazelcastClusterManager;
 
 import com.cisco.cmad.handler.BlogHandler;
@@ -50,6 +51,7 @@ public class BlogServiceVerticle  extends AbstractVerticle{
 	        
 	        //Start Server
 	        HttpServer server = vertx.createHttpServer(httpOpts);
+	        
 	        server.requestHandler(router::accept)
 	                .listen(
 	                        config().getInteger("https.port",8100), result -> {
@@ -90,13 +92,13 @@ public class BlogServiceVerticle  extends AbstractVerticle{
 		router.post("/Services/rest/blogs").handler(blogHandler::storeBlog);
 		router.post("/Services/rest/blogs/:blogId/comments").handler(blogHandler::submitComment);
 
-
-        router.route().failureHandler(rc->{
-	        int failCode = rc.statusCode();
-	        logger.error("In FailureHandler, Status code :" + failCode);
-	        HttpServerResponse response = rc.response();
-	        response.setStatusCode(failCode).end();
-        });
+		router.route().handler(StaticHandler.create().setCachingEnabled(true).setMaxAgeSeconds(60)::handle);
+//        router.route().failureHandler(rc->{
+//	        int failCode = rc.statusCode();
+//	        logger.error("In FailureHandler, Status code :" + failCode);
+//	        HttpServerResponse response = rc.response();
+//	        response.setStatusCode(failCode).end();
+//        });
     	
     }
 

@@ -30,8 +30,8 @@ public void getBlogs(RoutingContext rc) {
    if (logger.isDebugEnabled()) {
       logger.debug("Tag search ? , tag :" + queryParam);
    }
-   String authorization = rc.request().getHeader("Authorization");
-   
+   System.out.println("guitigiugi");
+   String authorization = rc.request().getHeader("Authorization"); 
    String userName = Base64.getDecoder().decode(authorization.substring(0,authorization.indexOf(":"))).toString();
    String password = Base64.getDecoder().decode(authorization.substring(authorization.indexOf(":")+1)).toString();
    
@@ -83,6 +83,8 @@ public void getBlogs(RoutingContext rc) {
   }
    catch (Exception e){
 	   logger.error("Exception while trying to authenticate"+e);
+	   rc.response().setStatusCode(401);
+	   rc.response().end();
    }
 }
 public void setEventBus(EventBus eb){
