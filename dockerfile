@@ -7,14 +7,13 @@ ENV VERTICLE_FILE target/BlogService-0.0.1-SNAPSHOT.jar
 
 # Set the location of the verticles         (3)
 ENV VERTICLE_HOME /usr/verticles
-
-EXPOSE 8200
+ 
 EXPOSE 54327
-
+EXPOSE 5701
 # Copy your verticle to the container       (4)
-COPY $VERTICLE_NAME $VERTICLE_HOME/
-
+#COPY $VERTICLE_NAME $VERTICLE_HOME/
+COPY $VERTICLE_FILE $VERTICLE_HOME/
 # Launch the verticle                       (5)
 WORKDIR $VERTICLE_HOME
 ENTRYPOINT ["sh", "-c"]
-CMD ["vertx run $VERTICLE_NAME -cp $VERTICLE_HOME -instances 20 -worker -cluster -conf conf/BlogServices.conf/*"]
+CMD ["vertx run $VERTICLE_NAME -cp $VERTICLE_HOME -instances 20 -worker -cluster -conf conf/BlogServices.conf"]

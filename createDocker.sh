@@ -2,7 +2,7 @@
 docker build -t godspeed990/blog-service .
 if [ $? = 0 ]
 then
-   docker run -i -p 8200:8200 godspeed990/blog-service &  
+   docker run -i -p 8200:$PORT godspeed990/blog-service &  
 else
    echo "Failed to build and deploy the docker container"
    exit 1
