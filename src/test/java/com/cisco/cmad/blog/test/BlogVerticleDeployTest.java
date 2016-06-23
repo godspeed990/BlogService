@@ -15,8 +15,6 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.net.JksOptions;
 import io.vertx.ext.unit.*;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
-import io.vertx.spi.cluster.hazelcast.HazelcastClusterManager;
-
 import java.net.ServerSocket;
 @RunWith(VertxUnitRunner.class)
 public class BlogVerticleDeployTest {
