@@ -3,22 +3,16 @@ package com.cisco.cmad.verticle;
 
 
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
-import io.vertx.core.Vertx;
-import io.vertx.core.VertxOptions;
+
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
-import io.vertx.core.http.HttpServerResponse;
-import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import io.vertx.core.net.JksOptions;
-import io.vertx.core.spi.cluster.ClusterManager;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.StaticHandler;
-import io.vertx.spi.cluster.hazelcast.HazelcastClusterManager;
 
 import com.cisco.cmad.handler.BlogHandler;
 import com.cisco.cmad.module.BlogModule;
@@ -102,21 +96,7 @@ public class BlogServiceVerticle  extends AbstractVerticle{
     	
     }
 
-	public static void main(String args[]){
-		
-		ClusterManager mgr = new HazelcastClusterManager();
-		VertxOptions options = new VertxOptions().setWorkerPoolSize(Integer.parseInt(args[1])).setClusterManager(mgr).setClusterHost("192.168.1.101");
-		Vertx.clusteredVertx(options, res -> {
-		  if (res.succeeded()) {
-		    Vertx vertx = res.result();
-		    DeploymentOptions depOptions = new DeploymentOptions().setConfig(new JsonObject().put("https.port", Integer.parseInt(args[0])));
-		    vertx.deployVerticle(BlogServiceVerticle.class.getName(),depOptions);
-		    eventBus = vertx.eventBus();
-		  } else {
-		    logger.error("Verticle GetServices Deployment on port"+args[0]+"failed");
-		  }
-		});
-	}
+
 
 
 }

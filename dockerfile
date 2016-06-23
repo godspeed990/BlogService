@@ -9,8 +9,6 @@ ENV VERTICLE_FAT BlogService-0.0.1-SNAPSHOT-fat.jar
 # Set the location of the verticles         (3)
 ENV VERTICLE_HOME /opt/verticles
  
-EXPOSE 54327
-EXPOSE 5701
 # Copy your verticle to the container       (4)
 COPY $VERTICLE_FOL $VERTICLE_HOME/
 # Launch the verticle                       (5)
