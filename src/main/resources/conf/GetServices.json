@@ -1,6 +1,0 @@
-{
-  "https.port" : 8200,
-  "dbHost": "localhost",
-  "dbPort": 27017,
-  "dbName": "blog_db"
-}
