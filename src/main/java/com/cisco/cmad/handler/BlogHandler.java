@@ -8,6 +8,8 @@ import org.bson.types.ObjectId;
 import com.cisco.cmad.model.*;
 import com.cisco.cmad.Service.BlogService;
 import java.util.Base64;
+
+
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
@@ -111,6 +113,7 @@ public void storeBlog(RoutingContext rc) {
 try{	        
   eventBus.send("com.cisco.cmad.user.authenticate",new JsonObject().put("userName",userName).put("password",password),response->{
 	  if (response.succeeded()){
+		  logger.debug("user:"+userName+"authenticated");
 		  JsonObject resp = (JsonObject) response.result().body();
 		  if (resp.getString("userId")!=null){
 			  blog.setUserId(new ObjectId(resp.getString("userId")));
@@ -154,6 +157,7 @@ public void submitComment(RoutingContext rc) {
     logger.debug("Comment object : " + comment);
   	eventBus.send("com.cisco.cmad.user.authenticate",new JsonObject().put("userName",userName).put("password",password),response->{
 		if (response.succeeded()){
+			  logger.debug("user:"+userName+"authenticated");
 			JsonObject resp = (JsonObject) response.result().body();
 			if (resp.getString("userId")!=null){
 				comment.setUserId(new ObjectId(resp.getString("userId")));
@@ -166,7 +170,7 @@ public void submitComment(RoutingContext rc) {
 			}
 		}
 		else {
-			rc.response().setStatusCode(500).end();
+			rc.response().setStatusCode(400).end();
 		}
   		
   	});     

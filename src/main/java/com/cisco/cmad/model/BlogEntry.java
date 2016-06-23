@@ -48,6 +48,7 @@ public class BlogEntry {
 			if (comment.isPresent()) this.comment = comment.get();
 		}
 		
+			@SuppressWarnings("deprecation")
 			public BlogEntry(JsonObject js){
 				this.id = new ObjectId(js.getString("_id"));
 				this.content = js.getString("content");

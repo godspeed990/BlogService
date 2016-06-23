@@ -10,7 +10,7 @@ import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import io.vertx.core.net.JksOptions;
+
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.StaticHandler;
 
@@ -38,32 +38,35 @@ public class BlogServiceVerticle  extends AbstractVerticle{
 
 	        blogHandler.setEventBus(eventBus);;
 	        
-	        //Enable SSL - currently using self signed certs
+	        //Enable SSL - 
 	        HttpServerOptions httpOpts = new HttpServerOptions();
-	        httpOpts.setKeyStoreOptions(new JksOptions().setPath("mykeystore.jks").setPassword("cmad.cisco"));
-	        httpOpts.setSsl(true);
+//	        httpOpts.setKeyStoreOptions(new JksOptions().setPath("mykeystore.jks").setPassword("cmad.cisco"));
+//	        httpOpts.setSsl(true);
 	        
 	        //Start Server
 	        HttpServer server = vertx.createHttpServer(httpOpts);
-	        
+	        int port = 8300;
+	        try{
+		         port = Integer.parseInt(System.getenv("LISTEN_PORT"));
+		        }
+		        catch (Exception e){
+		        	logger.error("Failed to get ENV PORT");
+		        }
 	        server.requestHandler(router::accept)
-	                .listen(
-	                        config().getInteger("https.port",8100), result -> {
-	                            if (result.succeeded()) {
-	                            if	(logger.isDebugEnabled())
-	                            		logger.debug("Verticle up at:"+config().getInteger("https.port",8100));
-	                                startFuture.complete();
-	                            } else {
-	                                startFuture.fail(result.cause());
-	                            }
-	                        }
-	                );
+            .listen(config().getInteger("http.port",port), result -> {
+                        if (result.succeeded()) {
+                        	logger.error("Get Services Verticles running over");
+                            startFuture.complete();
+                        } else {
+                        	logger.error("Get Services Verticles failed to startover");
+                            startFuture.fail(result.cause());
+                        }
+                    }
+            );
 
 
 	} 
-	
 
-    
     
     private void setRoutes(Router router){
         router.route().handler(ctx -> {
@@ -87,16 +90,8 @@ public class BlogServiceVerticle  extends AbstractVerticle{
 		router.post("/Services/rest/blogs/:blogId/comments").handler(blogHandler::submitComment);
 
 		router.route().handler(StaticHandler.create().setCachingEnabled(true).setMaxAgeSeconds(60)::handle);
-//        router.route().failureHandler(rc->{
-//	        int failCode = rc.statusCode();
-//	        logger.error("In FailureHandler, Status code :" + failCode);
-//	        HttpServerResponse response = rc.response();
-//	        response.setStatusCode(failCode).end();
-//        });
+
     	
     }
-
-
-
 
 }

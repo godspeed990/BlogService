@@ -9,12 +9,13 @@ import com.cisco.cmad.verticle.BlogServiceVerticle;
 
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
-import io.vertx.core.VertxOptions;
 import io.vertx.core.http.HttpClientOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.net.JksOptions;
 import io.vertx.ext.unit.*;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+
+
 import java.net.ServerSocket;
 @RunWith(VertxUnitRunner.class)
 public class BlogVerticleDeployTest {
@@ -29,7 +30,7 @@ public class BlogVerticleDeployTest {
 		socket.close();
 		
     	vertx = Vertx.vertx();
-   		DeploymentOptions depoptions = new DeploymentOptions().setConfig(new JsonObject().put("https.port", port));
+   		DeploymentOptions depoptions = new DeploymentOptions().setConfig(new JsonObject().put("http.port", port));
     	vertx.deployVerticle(BlogServiceVerticle.class.getName(), depoptions, context.asyncAssertSuccess());
 
 
@@ -44,7 +45,7 @@ public class BlogVerticleDeployTest {
 		
 		final Async async = context.async();
 
-        vertx.createHttpClient(new HttpClientOptions().setKeyStoreOptions(new JksOptions().setPath("mykeystore.jks").setPassword("cmad.cisco")).setSsl(true).setTrustAll(true).setVerifyHost(false)).getNow(port, "localhost", "/", resp -> {
+        vertx.createHttpClient().getNow(port, "localhost", "/", resp -> {
 
             context.assertEquals(200, resp.statusCode(), "Status code should be 200 ");
             resp.bodyHandler(body -> {
