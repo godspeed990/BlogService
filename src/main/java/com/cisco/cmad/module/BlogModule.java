@@ -18,7 +18,7 @@ import java.util.Optional;
 
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.Morphia;
-@BindConfig(value = "blogEntryService")
+@BindConfig(value = "conf/BlogServices")
 @Singleton
 public class BlogModule extends AbstractModule {
 
@@ -38,7 +38,7 @@ public class BlogModule extends AbstractModule {
         //create a new morphia instance
         Datastore datastore = new Morphia()
                 .mapPackage("com.cisco.cmad.model")
-                .createDatastore(mongoClient, "blog_db");
+                .createDatastore(mongoClient, dbName.orElse("blog_db"));
         datastore.ensureIndexes();
         return datastore;
     }

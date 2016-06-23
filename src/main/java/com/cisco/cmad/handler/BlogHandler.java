@@ -30,7 +30,6 @@ public void getBlogs(RoutingContext rc) {
    if (logger.isDebugEnabled()) {
       logger.debug("Tag search ? , tag :" + queryParam);
    }
-   System.out.println("guitigiugi");
    String authorization = rc.request().getHeader("Authorization"); 
    String userName = Base64.getDecoder().decode(authorization.substring(0,authorization.indexOf(":"))).toString();
    String password = Base64.getDecoder().decode(authorization.substring(authorization.indexOf(":")+1)).toString();

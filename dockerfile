@@ -3,18 +3,17 @@ FROM vertx/vertx3
 
 # Set the name of the verticle to deploy    (2)
 ENV VERTICLE_NAME com.cisco.cmad.verticle.BlogServiceVerticle
-ENV VERTICLE_FAT target/BlogService-0.0.1-SNAPSHOT-fat.jar
-ENV VERTICLE_JAR target/BlogService-0.0.1-SNAPSHOT.jar
+ENV VERTICLE_FOL target
+ENV VERTICLE_FAT BlogService-0.0.1-SNAPSHOT-fat.jar
 
 # Set the location of the verticles         (3)
-ENV VERTICLE_HOME /usr/verticles
+ENV VERTICLE_HOME /opt/verticles
  
 EXPOSE 54327
 EXPOSE 5701
 # Copy your verticle to the container       (4)
-COPY $VERTICLE_FAT $VERTICLE_HOME/
-COPY $VERTICLE_JAR $VERTICLE_HOME/
+COPY $VERTICLE_FOL $VERTICLE_HOME/
 # Launch the verticle                       (5)
 WORKDIR $VERTICLE_HOME
 ENTRYPOINT ["sh", "-c"]
-CMD ["vertx run $VERTICLE_NAME -cp $VERTICLE_JAR;$VERTICLE_FAT -instances 20 -worker -cluster -conf conf/BlogServices.conf"]
+CMD ["vertx run $VERTICLE_NAME -cp $VERTICLE_FAT -instances 10 -worker -cluster -conf conf/BlogServices.conf"]

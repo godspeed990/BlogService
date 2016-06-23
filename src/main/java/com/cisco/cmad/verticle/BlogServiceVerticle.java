@@ -105,7 +105,7 @@ public class BlogServiceVerticle  extends AbstractVerticle{
 	public static void main(String args[]){
 		
 		ClusterManager mgr = new HazelcastClusterManager();
-		VertxOptions options = new VertxOptions().setWorkerPoolSize(Integer.parseInt(args[1])).setClusterManager(mgr);
+		VertxOptions options = new VertxOptions().setWorkerPoolSize(Integer.parseInt(args[1])).setClusterManager(mgr).setClusterHost("192.168.1.101");
 		Vertx.clusteredVertx(options, res -> {
 		  if (res.succeeded()) {
 		    Vertx vertx = res.result();
