@@ -17,7 +17,6 @@ public class Comment {
 		private String content;
 //		private BlogUsers user;
 		private Date date ;
-		private String type;
 		DateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd G 'at' hh:mm:ss zs");
 		@Embedded
 		private List<Comment> comment = new ArrayList<Comment>();
@@ -27,14 +26,12 @@ public class Comment {
 			super();
 			this.id = id;
 			this.content = content;
-			this.type = "comment";
 			this.userId = userId;
 		}
 		 
 		 public Comment( String content, ObjectId userId) {
 			super();
 			this.content = content;
-			this.type = "comment";
 			this.userId = userId;
 		} 
 		 
@@ -45,7 +42,6 @@ public class Comment {
 				    }
 			    json.put("content", this.content)
 			    .put("user",userId.toHexString())
-			    .put("type", this.type)
 			    .put("date",dateFormat.format(this.date))	    
 			    ;
 				return json;
@@ -54,7 +50,6 @@ public class Comment {
 				if (js.containsKey("_id")) this.id = new ObjectId(js.getString("_id"));
 				if (js.containsKey("content")) this.content = js.getString("content");
 				if (js.containsKey("user")) this.userId = new ObjectId(js.getString("user"));
-			    this.type = "comment";
 			    if (js.containsKey("date")) this.date = new Date(js.getString("date"));
 				}
 		public String getUserId() {
@@ -79,12 +74,6 @@ public class Comment {
 		}
 		public void setContent(String content) {
 			this.content = content;
-		}
-		public String getType() {
-			return type;
-		}
-		public void setType(String type) {
-			this.type = type;
 		}
 		public List<Comment> getComment() {
 			return comment;

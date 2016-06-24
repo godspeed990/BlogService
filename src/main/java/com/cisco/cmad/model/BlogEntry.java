@@ -29,7 +29,6 @@ public class BlogEntry {
 		private ArrayList<String> tags = new ArrayList<String>();
 //		private BlogUsers user;
 		private Date date ;
-		private String type;
 		DateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd G 'at' hh:mm:ss z");
 		@Embedded
 		private ArrayList<Comment> comment= new ArrayList<Comment>();
@@ -43,7 +42,6 @@ public class BlogEntry {
 			this.title = title;
 			List<String> temp = Arrays.asList(tags.split(","));
 			this.tags.addAll(temp);
-			this.type = "blogentry";
 			if (id.isPresent()) this.userId = userId.get();
 			if (comment.isPresent()) this.comment = comment.get();
 		}
@@ -55,8 +53,6 @@ public class BlogEntry {
 				if (js.containsKey("tags")) this.tags.addAll(js.getJsonArray("tags").getList());
 				if (js.containsKey("title")) this.title = js.getString("title");
 				if (js.containsKey("user")) this.userId = new ObjectId(js.getString("user"));
-				if (js.containsKey("type"))	{	this.type = js.getString("type");}
-				else { this.type = "blogentry";}
 				if (js.containsKey("date")) this.date = new Date(js.getString("date"));
 				if (js.containsKey("comment")){
 				JsonArray arr = js.getJsonArray("comment");
@@ -82,7 +78,6 @@ public class BlogEntry {
 				    .put("tags",Arrays.asList(tags))
 				    .put("title",this.title)
 				    .put("user",userId.toHexString())
-				    .put("type", this.type)
 				    .put("date",this.date)
 				    .put("comment",commenttoJsonArray() )	    
 				    ;
