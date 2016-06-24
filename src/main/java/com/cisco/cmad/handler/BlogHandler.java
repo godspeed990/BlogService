@@ -35,10 +35,10 @@ public void getBlogs(RoutingContext rc) {
    String userName = new String(Base64.getDecoder().decode(authorization.substring(authorization.lastIndexOf(" ")+1,authorization.indexOf(":"))));
    String password = new String(Base64.getDecoder().decode(authorization.substring(authorization.indexOf(":")+1)));
    JsonObject req = new JsonObject().put("userName",userName).put("password",password);
-   logger.error("Request send to :"+req.encode());
+   logger.debug("Request send to :"+req.encode());
    eventBus.send("com.cisco.cmad.user.authenticate",req,message->{
 	if (message.succeeded()){
-		logger.error("Reply from user"+message.result().body());
+		logger.debug("Reply from user"+message.result().body());
 		JsonObject user = (JsonObject) message.result().body();
 		if (user.containsKey("userName")){
 		rc.vertx().executeBlocking(future -> {
@@ -136,7 +136,7 @@ public void submitComment(RoutingContext rc) {
     String userName = new String(Base64.getDecoder().decode(authorization.substring(authorization.lastIndexOf(" ")+1,authorization.indexOf(":"))));
     String password = new String(Base64.getDecoder().decode(authorization.substring(authorization.indexOf(":")+1)));
     JsonObject req = new JsonObject().put("userName",userName).put("password",password);
-    logger.error("Request send to :"+req.encode());
+    logger.debug("Request send to :"+req.encode());
   try{
 	 eventBus.send("com.cisco.cmad.user.authenticate",req,message->{
 		 if (message.succeeded()){
@@ -145,7 +145,7 @@ public void submitComment(RoutingContext rc) {
 					comment.setFirstName(user.getString("firstName"));
 					comment.setLastName(user.getString("lastName"));
 					blogService.updateBlogWithComments(blogId, comment);
-					rc.response().setStatusCode(201).end();
+					rc.response().setStatusCode(200).end();
 					logger.debug("Comment added");
 				}
 				else {
