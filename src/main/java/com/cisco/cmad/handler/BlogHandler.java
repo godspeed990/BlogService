@@ -38,8 +38,9 @@ public void getBlogs(RoutingContext rc) {
    logger.error("Request send to :"+req.encode());
    eventBus.send("com.cisco.cmad.user.authenticate",req,message->{
 	if (message.succeeded()){
+		logger.error("Reply from user"+message.result().body());
 		JsonObject user = (JsonObject) message.result().body();
-		if (user.containsKey("userId")){
+		if (user.containsKey("userName")){
 		rc.vertx().executeBlocking(future -> {
 			   try {
 				   List<BlogEntry> blogList;
@@ -68,12 +69,12 @@ public void getBlogs(RoutingContext rc) {
 		);
 		}else {
 			rc.response().setStatusCode(404).end();
-			logger.error("Auth failed"+message.result());
+			logger.error("Auth failed"+message.result().body());
 		}
 	}
 	else {
 		rc.response().setStatusCode(404);
-		logger.error("Auth failed"+message.result());
+		logger.error("Auth failed"+message.result().body());
 	}
    }); 
 }
@@ -111,7 +112,7 @@ public void storeBlog(RoutingContext rc) {
 			}
 	  else {
 		  rc.response().setStatusCode(400).end();
-			logger.debug("Message failed " + message.cause()+message.result());
+			logger.debug("Message failed " + message.cause()+message.result().body());
 	  }
 
   });
@@ -140,7 +141,7 @@ public void submitComment(RoutingContext rc) {
 	 eventBus.send("com.cisco.cmad.user.authenticate",req,message->{
 		 if (message.succeeded()){
 			JsonObject user = (JsonObject) message.result().body();
-				if (user.containsKey("userId")){
+				if (user.containsKey("userName")){
 					comment.setFirstName(user.getString("firstName"));
 					comment.setLastName(user.getString("lastName"));
 					blogService.updateBlogWithComments(blogId, comment);
