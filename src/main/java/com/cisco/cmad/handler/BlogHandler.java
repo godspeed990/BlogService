@@ -32,10 +32,10 @@ public void getBlogs(RoutingContext rc) {
    }
    String authorization = rc.request().getHeader("Authorization"); 
    System.out.println(authorization);
-   String userName = Base64.getDecoder().decode(authorization.substring(authorization.lastIndexOf(" ")+1,authorization.indexOf(":"))).toString();
-   String password = Base64.getDecoder().decode(authorization.substring(authorization.indexOf(":")+1)).toString();
+   String userName = new String(Base64.getDecoder().decode(authorization.substring(authorization.lastIndexOf(" ")+1,authorization.indexOf(":"))));
+   String password = new String(Base64.getDecoder().decode(authorization.substring(authorization.indexOf(":")+1)));
    JsonObject req = new JsonObject().put("userName",userName).put("password",password);
-   logger.debug("Request send to :"+req.encode());
+   logger.error("Request send to :"+req.encode());
    eventBus.send("com.cisco.cmad.user.authenticate",req,message->{
 	if (message.succeeded()){
 		JsonObject user = (JsonObject) message.result();
@@ -85,8 +85,8 @@ public void storeBlog(RoutingContext rc) {
   String jSonString = rc.getBodyAsString(); //get JSON body as String
   String authorization = rc.request().getHeader("Authorization");
   //JsonObject jSonString = rc.getBodyAsJson();
-  String userName = Base64.getDecoder().decode(authorization.substring(authorization.lastIndexOf(" ")+1,authorization.indexOf(":"))).toString();
-  String password = Base64.getDecoder().decode(authorization.substring(authorization.indexOf(":")+1)).toString();
+  String userName = new String(Base64.getDecoder().decode(authorization.substring(authorization.lastIndexOf(" ")+1,authorization.indexOf(":"))));
+  String password = new String(Base64.getDecoder().decode(authorization.substring(authorization.indexOf(":")+1)));
   JsonObject req = new JsonObject().put("userName",userName).put("password",password);
   logger.debug("Request send to :"+req.encode());
   if (logger.isDebugEnabled())
@@ -132,10 +132,10 @@ public void submitComment(RoutingContext rc) {
     Comment comment = Json.decodeValue(jSonString, Comment.class);
     String authorization = rc.request().getHeader("Authorization");
     comment.setDate();
-    String userName = Base64.getDecoder().decode(authorization.substring(authorization.lastIndexOf(" ")+1,authorization.indexOf(":"))).toString();
-    String password = Base64.getDecoder().decode(authorization.substring(authorization.indexOf(":")+1)).toString();
+    String userName = new String(Base64.getDecoder().decode(authorization.substring(authorization.lastIndexOf(" ")+1,authorization.indexOf(":"))));
+    String password = new String(Base64.getDecoder().decode(authorization.substring(authorization.indexOf(":")+1)));
     JsonObject req = new JsonObject().put("userName",userName).put("password",password);
-    logger.debug("Request send to :"+req.encode());
+    logger.error("Request send to :"+req.encode());
   try{
 	 eventBus.send("com.cisco.cmad.user.authenticate",req,message->{
 		 if (message.succeeded()){
