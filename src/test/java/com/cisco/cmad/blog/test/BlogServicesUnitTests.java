@@ -30,9 +30,10 @@ public class BlogServicesUnitTests {
         BlogEntry blog = Mockito.mock(BlogEntry.class);
         Mockito.when(blog.getId()).thenReturn(ObjectId.get().toHexString());
         Mockito.when(blog.getTitle()).thenReturn(title);
-        ArrayList<String> returnTags = new ArrayList<String>();
-        returnTags.add(tag.orElse(""));
-        Mockito.when(blog.getTags()).thenReturn(returnTags);
+//        ArrayList<String> returnTags = new ArrayList<String>();
+ //       returnTags.add(tag.orElse(""));
+ //       Mockito.when(blog.getTags()).thenReturn(returnTags);
+        Mockito.when(blog.getTags()).thenReturn(tag.orElse(""));
         return blog;
     }
     @SuppressWarnings("deprecation")

@@ -17,6 +17,7 @@ import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.StaticHandler;
 import io.vertx.ext.web.handler.BodyHandler;
+
 import com.cisco.cmad.handler.BlogHandler;
 import com.cisco.cmad.module.BlogModule;
 import com.google.inject.Guice;

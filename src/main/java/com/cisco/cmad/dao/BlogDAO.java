@@ -1,14 +1,12 @@
 package com.cisco.cmad.dao;
 import com.cisco.cmad.model.*;
 import com.google.inject.Inject;
-import com.mongodb.MongoClient;
 
 import java.util.List;
 import java.util.Optional;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.Datastore;
-import org.mongodb.morphia.Morphia;
 import org.mongodb.morphia.dao.BasicDAO;
 import org.mongodb.morphia.mapping.Mapper;
 import org.mongodb.morphia.query.Query;
@@ -31,8 +29,8 @@ public class BlogDAO extends BasicDAO<BlogEntry, ObjectId>{
 
     public void submitComments(String blogId,Comment comment) {
         UpdateOperations<BlogEntry> ops;        
-        Query<BlogEntry> query = createQuery().field("_id").equal(blogId);
-        update(query, createUpdateOperations().add("comments", comment));
+        Query<BlogEntry> query = createQuery().field(Mapper.ID_KEY).equal(new ObjectId(blogId));
+        update(query, createUpdateOperations().add("comment", comment));
     }
     
     public String storeBlog(BlogEntry blog) {

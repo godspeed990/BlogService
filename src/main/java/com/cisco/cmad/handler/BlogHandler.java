@@ -4,7 +4,6 @@ package com.cisco.cmad.handler;
 
 import java.util.List;
 import java.util.Optional;
-import org.bson.types.ObjectId;
 import com.cisco.cmad.model.*;
 import com.cisco.cmad.Service.BlogService;
 import java.util.Base64;
@@ -12,7 +11,6 @@ import java.util.Base64;
 
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.Json;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
@@ -36,147 +34,128 @@ public void getBlogs(RoutingContext rc) {
    System.out.println(authorization);
    String userName = Base64.getDecoder().decode(authorization.substring(authorization.lastIndexOf(" ")+1,authorization.indexOf(":"))).toString();
    String password = Base64.getDecoder().decode(authorization.substring(authorization.indexOf(":")+1)).toString();
-   
-   try{	        
-	   eventBus.send("com.cisco.cmad.user.authenticate",new JsonObject().put("userName",userName).put("password",password),resp->{
-		   rc.vertx().executeBlocking(future -> {
-		   try {
-			   List<BlogEntry> blogList;
-	          if (queryParam != null && queryParam.trim().length() > 0) {
-	           blogList = blogService.getBlogs(Optional.ofNullable(queryParam));	            
-	          } else {
-	                    //get all blogs
-	            blogList = blogService.getBlogs(Optional.empty());
-	          }
-	          future.complete(Json.encodePrettily(blogList));
-		   } catch (Exception ex) {
-               logger.error("Exception while trying to fetch blogs " + queryParam, ex);
-               future.fail(ex);
-           }
-       }, res -> {           
-    	   if (res.succeeded()) {
-    	   Object obj = res.result();
-    	   List<BlogEntry> blogs= (List<BlogEntry>) obj;
-    	   for (int i=0;i<blogs.size();i++){
-    		   JsonObject temp = blogs.get(i).toJson();
-    		   eventBus.send("com.cisco.cmad.user.info",new JsonObject().put("userId",blogs.get(i).getUserId()),response->{
-    			   if (response.succeeded()){
-    				   Object respObj = response.result();
-    				   JsonObject JsonObj = (JsonObject) respObj;
-    				   rc.response().write(Json.encode(temp.put("userName",JsonObj.getString("userName"))
-    						   .put("firstName",JsonObj.getString("firstName"))
-    						   .put("lastName",JsonObj.getString("lastName")))   						   
-    						   );
-    			   }
-    		   });
-    	   }
-    	   rc.response().setStatusCode(200);
-    	   rc.response().end();
-    	   }
-    	   else {
-    		   rc.response().setStatusCode(400);
-    		   rc.response().end();
-    	   }
-    	   
-   
-	        }
-	        );
-   });
-  }
-   catch (Exception e){
-	   logger.error("Exception while trying to authenticate"+e);
-	   rc.response().setStatusCode(401);
-	   rc.response().end();
-   }
+   eventBus.send("com.cisco.cmad.user.authenticate",new JsonObject().put("userName",userName).put("password",password),message->{
+	if (message.succeeded()){
+		JsonObject user = (JsonObject) message.result();
+		if (user.containsKey("userId")){
+		rc.vertx().executeBlocking(future -> {
+			   try {
+				   List<BlogEntry> blogList;
+			      if (queryParam != null && queryParam.trim().length() > 0) {
+			       blogList = blogService.getBlogs(Optional.ofNullable(queryParam));	            
+			      } else {
+			                //get all blogs
+			        blogList = blogService.getBlogs(Optional.empty());
+			      }
+			      future.complete(Json.encodePrettily(blogList));
+			   } catch (Exception ex) {
+			       logger.error("Exception while trying to fetch blogs " + queryParam, ex);
+			       future.fail(ex);
+			   }
+			}, res -> {           
+			   if (res.succeeded()) {
+				   System.out.println(res.result());
+			   rc.response().setStatusCode(200);
+			   rc.response().end(res.result().toString());
+			   }
+			   else {
+				   rc.response().setStatusCode(400);
+				   rc.response().end();
+			   }
+			}   
+		);
+		}else {
+			rc.response().setStatusCode(404).end();
+			logger.error("Auth failed"+message.result());
+		}
+	}
+	else {
+		rc.response().setStatusCode(404);
+		logger.error("Auth failed"+message.result());
+	}
+   }); 
 }
 public void setEventBus(EventBus eb){
    eventBus =eb;
 }
 
-
 public void storeBlog(RoutingContext rc) {
-//  String jSonString = rc.getBodyAsString();
-	JsonObject jSonString = rc.getBodyAsJson(); //get JSON body as String
+  String jSonString = rc.getBodyAsString(); //get JSON body as String
   String authorization = rc.request().getHeader("Authorization");
-  
+  //JsonObject jSonString = rc.getBodyAsJson();
   String userName = Base64.getDecoder().decode(authorization.substring(authorization.lastIndexOf(" ")+1,authorization.indexOf(":"))).toString();
   String password = Base64.getDecoder().decode(authorization.substring(authorization.indexOf(":")+1)).toString();
 
   if (logger.isDebugEnabled())
      logger.debug("JSON String from POST " + jSonString);
-//  BlogEntry blog = Json.decodeValue(jSonString, BlogEntry.class);
-  BlogEntry blog = new BlogEntry(Optional.empty(),rc.getBodyAsJson().getValue("content").toString(),rc.getBodyAsJson().getString("title"),rc.getBodyAsJson().getString("tags"),
-		  Optional.empty(),Optional.empty());
-  if (logger.isDebugEnabled())
-     logger.debug("RegistrationDTO object after json Decode : " + blog);
-try{	        
-  eventBus.send("com.cisco.cmad.user.authenticate",new JsonObject().put("userName",userName).put("password",password),response->{
-	  if (response.succeeded()){
-		  logger.debug("user:"+userName+"authenticated");
-		  JsonObject resp = (JsonObject) response.result().body();
-		  if (resp.getString("userId")!=null){
-			  blog.setUserId(new ObjectId(resp.getString("userId")));
-			  blogService.storeBlog(blog);
-              if (logger.isDebugEnabled())
-                  logger.debug("Blog stored successfully");
-		  }
-			else {
-				rc.response().setStatusCode(401).end();
+
+  BlogEntry blog = Json.decodeValue(jSonString, BlogEntry.class);
+/*BlogEntry blog =new BlogEntry(Optional.empty(),rc.getBodyAsJson().getValue("content").toString(),
+		rc.getBodyAsJson().getValue("title").toString(),rc.getBodyAsJson().getValue("tags").toString(),
+				Optional.empty(),Optional.empty()
+		);*/
+  try{
+  eventBus.send("com.cisco.cmad.user.authenticate",new JsonObject().put("userName",userName).put("password",password),message->{
+	  logger.debug("Message body"+message.result());
+	  if (message.succeeded()){
+		  JsonObject body = (JsonObject) message.result();
+		  	blog.setFirstName(body.getString("firstName"));
+		  	blog.setFirstName(body.getString("lastName"));
+		  	blogService.storeBlog(blog);
+			if (logger.isDebugEnabled())
+				logger.debug("RegistrationDTO object after json Decode : " + blog);
+			rc.response().setStatusCode(201).end();
 			}
-	  }
 	  else {
+		  rc.response().setStatusCode(400).end();
+			logger.debug("Message failed " + message.cause()+message.result());
 	  }
+
   });
   }
-catch (Exception e){		  
-	logger.error("Error occurred while trying to save blog with " + blog.getId(), e);
-	rc.response().setStatusCode(401).end();
-}
+  catch (Exception e){
+	  logger.debug("Error"+e.getStackTrace());
+  }
+ }
 	        
-	        
-	        //   BlogEntry blogE = new BlogEntry(Optional.ofNullable(null),rc.getBodyAsJson().getValue("content").toString(),rc.getBodyAsJson().getValue("title").toString(),rc.getBodyAsJson().getValue("tags").toString(),userid,Optional.ofNullable(null));
-	        
-	   
-	   }
 
 	    
 public void submitComment(RoutingContext rc) {
-//  String jSonString = rc.getBodyAsString(); 
-	JsonObject jSonString = rc.getBodyAsJson(); //get JSON body as String
+  String jSonString = rc.getBodyAsString(); 
   String blogId = rc.request().getParam("blogId");
 
   if (logger.isDebugEnabled())
     logger.debug("JSON String from POST " + jSonString + " Blog Id :" + blogId);
-//    Comment comment = Json.decodeValue(jSonString, Comment.class);
-    Comment comment = new Comment(jSonString);
+    Comment comment = Json.decodeValue(jSonString, Comment.class);
     String authorization = rc.request().getHeader("Authorization");
-    
+    comment.setDate();
     String userName = Base64.getDecoder().decode(authorization.substring(authorization.lastIndexOf(" ")+1,authorization.indexOf(":"))).toString();
     String password = Base64.getDecoder().decode(authorization.substring(authorization.indexOf(":")+1)).toString();
 
-  if (logger.isDebugEnabled())
-    logger.debug("Comment object : " + comment);
-  	eventBus.send("com.cisco.cmad.user.authenticate",new JsonObject().put("userName",userName).put("password",password),response->{
-		if (response.succeeded()){
-			  logger.debug("user:"+userName+"authenticated");
-			JsonObject resp = (JsonObject) response.result().body();
-			if (resp.getString("userId")!=null){
-				comment.setUserId(new ObjectId(resp.getString("userId")));
-				blogService.updateBlogWithComments(blogId, comment);
-				if (logger.isDebugEnabled())
-                logger.debug("Comment updated in blog successfully");
+  try{
+	 eventBus.send("com.cisco.cmad.user.authenticate",new JsonObject().put("userName",userName).put("password",password),message->{
+		 if (message.succeeded()){
+			JsonObject user = (JsonObject) message.result();
+				if (user.containsKey("userId")){
+					comment.setFirstName(user.getString("firstName"));
+					comment.setLastName(user.getString("lastName"));
+					blogService.updateBlogWithComments(blogId, comment);
+					rc.response().setStatusCode(201).end();
+					logger.debug("Comment added");
 				}
-			else {
-				rc.response().setStatusCode(401).end();
-			}
-		}
-		else {
-			rc.response().setStatusCode(400).end();
-		}
-  		
-  	});     
-	   
-	   }
-	   
+				else {
+					rc.response().setStatusCode(400).end();
+				}
+		 }
+		 else {
+			 rc.response().setStatusCode(404).end();
+		 } 
+	 });
 
+	   }
+  catch (Exception e){
+	  logger.error("Logging error in updating comments"+e.getStackTrace());
+  }
+	   
+}
 	        }
