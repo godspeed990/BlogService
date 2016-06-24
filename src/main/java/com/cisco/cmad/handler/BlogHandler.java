@@ -38,7 +38,7 @@ public void getBlogs(RoutingContext rc) {
    logger.error("Request send to :"+req.encode());
    eventBus.send("com.cisco.cmad.user.authenticate",req,message->{
 	if (message.succeeded()){
-		JsonObject user = (JsonObject) message.result();
+		JsonObject user = (JsonObject) message.result().body();
 		if (user.containsKey("userId")){
 		rc.vertx().executeBlocking(future -> {
 			   try {
@@ -99,9 +99,9 @@ public void storeBlog(RoutingContext rc) {
 		);*/
   try{
   eventBus.send("com.cisco.cmad.user.authenticate",req,message->{
-	  logger.debug("Message body"+message.result());
+	  logger.debug("Message body"+message.result().body());
 	  if (message.succeeded()){
-		  JsonObject body = (JsonObject) message.result();
+		  JsonObject body = (JsonObject) message.result().body();
 		  	blog.setFirstName(body.getString("firstName"));
 		  	blog.setFirstName(body.getString("lastName"));
 		  	blogService.storeBlog(blog);
@@ -139,7 +139,7 @@ public void submitComment(RoutingContext rc) {
   try{
 	 eventBus.send("com.cisco.cmad.user.authenticate",req,message->{
 		 if (message.succeeded()){
-			JsonObject user = (JsonObject) message.result();
+			JsonObject user = (JsonObject) message.result().body();
 				if (user.containsKey("userId")){
 					comment.setFirstName(user.getString("firstName"));
 					comment.setLastName(user.getString("lastName"));
