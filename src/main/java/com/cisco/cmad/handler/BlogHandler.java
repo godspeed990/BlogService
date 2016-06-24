@@ -34,7 +34,7 @@ public void getBlogs(RoutingContext rc) {
    }
    String authorization = rc.request().getHeader("Authorization"); 
    System.out.println(authorization);
-   String userName = Base64.getDecoder().decode(authorization.substring(authorization.lastIndexOf(" "),authorization.indexOf(":"))).toString();
+   String userName = Base64.getDecoder().decode(authorization.substring(authorization.lastIndexOf(" ")+1,authorization.indexOf(":"))).toString();
    String password = Base64.getDecoder().decode(authorization.substring(authorization.indexOf(":")+1)).toString();
    
    try{	        
@@ -99,7 +99,7 @@ public void storeBlog(RoutingContext rc) {
 	JsonObject jSonString = rc.getBodyAsJson(); //get JSON body as String
   String authorization = rc.request().getHeader("Authorization");
   
-  String userName = Base64.getDecoder().decode(authorization.substring(authorization.lastIndexOf(" "),authorization.indexOf(":"))).toString();
+  String userName = Base64.getDecoder().decode(authorization.substring(authorization.lastIndexOf(" ")+1,authorization.indexOf(":"))).toString();
   String password = Base64.getDecoder().decode(authorization.substring(authorization.indexOf(":")+1)).toString();
 
   if (logger.isDebugEnabled())
@@ -151,7 +151,7 @@ public void submitComment(RoutingContext rc) {
     Comment comment = new Comment(jSonString);
     String authorization = rc.request().getHeader("Authorization");
     
-    String userName = Base64.getDecoder().decode(authorization.substring(authorization.lastIndexOf(" "),authorization.indexOf(":"))).toString();
+    String userName = Base64.getDecoder().decode(authorization.substring(authorization.lastIndexOf(" ")+1,authorization.indexOf(":"))).toString();
     String password = Base64.getDecoder().decode(authorization.substring(authorization.indexOf(":")+1)).toString();
 
   if (logger.isDebugEnabled())

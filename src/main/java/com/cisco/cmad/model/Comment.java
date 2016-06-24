@@ -51,11 +51,11 @@ public class Comment {
 				return json;
 		}
 			public Comment(JsonObject js){
-				this.id = new ObjectId(js.getString("_id"));
-				this.content = js.getString("content");
-				this.userId = new ObjectId(js.getString("user"));
-				this.type = js.getString("type");
-				this.date = new Date(js.getString("date"));
+				if (js.containsKey("_id")) this.id = new ObjectId(js.getString("_id"));
+				if (js.containsKey("content")) this.content = js.getString("content");
+				if (js.containsKey("user")) this.userId = new ObjectId(js.getString("user"));
+			    this.type = "comment";
+			    if (js.containsKey("date")) this.date = new Date(js.getString("date"));
 				}
 		public String getUserId() {
 			return userId.toHexString();

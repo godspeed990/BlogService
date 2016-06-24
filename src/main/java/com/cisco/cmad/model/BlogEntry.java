@@ -50,16 +50,19 @@ public class BlogEntry {
 		
 			@SuppressWarnings("deprecation")
 			public BlogEntry(JsonObject js){
-				this.id = new ObjectId(js.getString("_id"));
-				this.content = js.getString("content");
-				this.tags.addAll(js.getJsonArray("tags").getList());
-				this.title = js.getString("title");
-				this.userId = new ObjectId(js.getString("user"));
-				this.type = js.getString("type");
-				this.date = new Date(js.getString("date"));
+				if (js.containsKey("_id")) this.id = new ObjectId(js.getString("_id"));
+				if (js.containsKey("content")) this.content = js.getString("content");
+				if (js.containsKey("tags")) this.tags.addAll(js.getJsonArray("tags").getList());
+				if (js.containsKey("title")) this.title = js.getString("title");
+				if (js.containsKey("user")) this.userId = new ObjectId(js.getString("user"));
+				if (js.containsKey("type"))	{	this.type = js.getString("type");}
+				else { this.type = "blogentry";}
+				if (js.containsKey("date")) this.date = new Date(js.getString("date"));
+				if (js.containsKey("comment")){
 				JsonArray arr = js.getJsonArray("comment");
 				for (int i =0;i<arr.size();i++){
 				this.comment.add(new Comment(arr.getJsonObject(i)));
+				}
 				}
 				}
 			public JsonArray commenttoJsonArray(){
