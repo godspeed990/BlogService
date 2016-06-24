@@ -36,15 +36,15 @@ public class BlogEntry {
 		private ObjectId userId ;
 		
 		 public BlogEntry(Optional<ObjectId> id, String content, String title, String tags, 
-				 ObjectId userId,Optional<ArrayList<Comment>> comment) {
-			super();
+				 Optional<ObjectId> userId,Optional<ArrayList<Comment>> comment) {
+			
 			if (id.isPresent()) this.id = id.get();
 			this.content = content;
 			this.title = title;
 			List<String> temp = Arrays.asList(tags.split(","));
 			this.tags.addAll(temp);
 			this.type = "blogentry";
-			this.userId = userId;
+			if (id.isPresent()) this.userId = userId.get();
 			if (comment.isPresent()) this.comment = comment.get();
 		}
 		

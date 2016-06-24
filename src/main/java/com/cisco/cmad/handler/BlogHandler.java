@@ -106,7 +106,8 @@ public void storeBlog(RoutingContext rc) {
      logger.debug("JSON String from POST " + jSonString);
 
 //  BlogEntry blog = Json.decodeValue(jSonString, BlogEntry.class);
-  BlogEntry blog = new BlogEntry(jSonString);
+  BlogEntry blog = new BlogEntry(Optional.empty(),jSonString.getString("content"),jSonString.getString("title"),jSonString.getString("tags"),
+		  Optional.empty(),Optional.empty());
   if (logger.isDebugEnabled())
      logger.debug("RegistrationDTO object after json Decode : " + blog);
 try{	        
