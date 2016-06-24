@@ -33,7 +33,8 @@ public void getBlogs(RoutingContext rc) {
       logger.debug("Tag search ? , tag :" + queryParam);
    }
    String authorization = rc.request().getHeader("Authorization"); 
-   String userName = Base64.getDecoder().decode(authorization.substring(0,authorization.indexOf(":"))).toString();
+   System.out.println(authorization);
+   String userName = Base64.getDecoder().decode(authorization.substring(authorization.lastIndexOf(" "),authorization.indexOf(":"))).toString();
    String password = Base64.getDecoder().decode(authorization.substring(authorization.indexOf(":")+1)).toString();
    
    try{	        
@@ -92,22 +93,20 @@ public void setEventBus(EventBus eb){
    eventBus =eb;
 }
 
-public JsonArray getUserInfo(List<BlogEntry> blogs){
-	
-	return new JsonArray();
-}
+
 public void storeBlog(RoutingContext rc) {
-  String jSonString = rc.getBodyAsString(); //get JSON body as String
+//  String jSonString = rc.getBodyAsString();
+	JsonObject jSonString = rc.getBodyAsJson(); //get JSON body as String
   String authorization = rc.request().getHeader("Authorization");
   
-  String userName = Base64.getDecoder().decode(authorization.substring(0,authorization.indexOf(":"))).toString();
+  String userName = Base64.getDecoder().decode(authorization.substring(authorization.lastIndexOf(" "),authorization.indexOf(":"))).toString();
   String password = Base64.getDecoder().decode(authorization.substring(authorization.indexOf(":")+1)).toString();
 
   if (logger.isDebugEnabled())
      logger.debug("JSON String from POST " + jSonString);
 
-  BlogEntry blog = Json.decodeValue(jSonString, BlogEntry.class);
-
+//  BlogEntry blog = Json.decodeValue(jSonString, BlogEntry.class);
+  BlogEntry blog = new BlogEntry(jSonString);
   if (logger.isDebugEnabled())
      logger.debug("RegistrationDTO object after json Decode : " + blog);
 try{	        
@@ -142,15 +141,17 @@ catch (Exception e){
 
 	    
 public void submitComment(RoutingContext rc) {
-  String jSonString = rc.getBodyAsString(); 
+//  String jSonString = rc.getBodyAsString(); 
+	JsonObject jSonString = rc.getBodyAsJson(); //get JSON body as String
   String blogId = rc.request().getParam("blogId");
 
   if (logger.isDebugEnabled())
     logger.debug("JSON String from POST " + jSonString + " Blog Id :" + blogId);
-    Comment comment = Json.decodeValue(jSonString, Comment.class);
+//    Comment comment = Json.decodeValue(jSonString, Comment.class);
+    Comment comment = new Comment(jSonString);
     String authorization = rc.request().getHeader("Authorization");
     
-    String userName = Base64.getDecoder().decode(authorization.substring(0,authorization.indexOf(":"))).toString();
+    String userName = Base64.getDecoder().decode(authorization.substring(authorization.lastIndexOf(" "),authorization.indexOf(":"))).toString();
     String password = Base64.getDecoder().decode(authorization.substring(authorization.indexOf(":")+1)).toString();
 
   if (logger.isDebugEnabled())

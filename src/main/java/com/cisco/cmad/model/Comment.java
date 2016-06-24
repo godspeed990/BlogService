@@ -3,30 +3,24 @@ package com.cisco.cmad.model;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.*;
-
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
-@Entity("comment")
-@Indexes({
-    @Index(fields = @Field("userId"))
-})
+@Embedded
 public class Comment {
 
-		@Id
 		private ObjectId id;
 		private String content;
 //		private BlogUsers user;
 		private Date date ;
 		private String type;
 		DateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd G 'at' hh:mm:ss zs");
-		@Reference("blogs")
-		private ArrayList<Comment> comment= new ArrayList<Comment>();
+		@Embedded
+		private List<Comment> comment = new ArrayList<Comment>();
 		private ObjectId userId ;
 		
 		 public Comment(ObjectId id, String content, ObjectId userId) {
@@ -92,13 +86,14 @@ public class Comment {
 		public void setType(String type) {
 			this.type = type;
 		}
-		public ArrayList<Comment> getComment() {
+		public List<Comment> getComment() {
 			return comment;
 		}
 		public void addComment(Comment comment) {
-			this.comment.add(comment);
+			if (comment !=null)
+				this.comment.add(comment);
 		}
-		public void addComment(ArrayList<Comment> comment) {
+		public void addComment(List<Comment> comment) {
 			this.comment.addAll(comment);
 		}
 		public Date getDate() {
