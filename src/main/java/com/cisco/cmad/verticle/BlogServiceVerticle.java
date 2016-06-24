@@ -3,17 +3,20 @@ package com.cisco.cmad.verticle;
 
 
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Future;
-
+import io.vertx.core.Vertx;
+import io.vertx.core.VertxOptions;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
+import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.StaticHandler;
-
+import io.vertx.ext.web.handler.BodyHandler;
 import com.cisco.cmad.handler.BlogHandler;
 import com.cisco.cmad.module.BlogModule;
 import com.google.inject.Guice;
@@ -34,6 +37,8 @@ public class BlogServiceVerticle  extends AbstractVerticle{
 	        Guice.createInjector(module).injectMembers(this);
 	        //Router object is responsible for dispatching the HTTP requests to the right handler
 	        Router router = Router.router(vertx);
+
+
 	        setRoutes(router);
 
 	        blogHandler.setEventBus(eventBus);;
@@ -45,7 +50,7 @@ public class BlogServiceVerticle  extends AbstractVerticle{
 	        
 	        //Start Server
 	        HttpServer server = vertx.createHttpServer(httpOpts);
-	        int port = 8300;
+	        int port = 8100;
 	        try{
 		         port = Integer.parseInt(System.getenv("LISTEN_PORT"));
 		        }
@@ -69,22 +74,9 @@ public class BlogServiceVerticle  extends AbstractVerticle{
 
     
     private void setRoutes(Router router){
-        router.route().handler(ctx -> {
-            ctx.response()
-                    .putHeader("Cache-Control", "no-store, no-cache")
-                    .putHeader("X-Content-Type-Options", "nosniff")
-                    .putHeader("X-Download-Options", "noopen")
-                    .putHeader("X-XSS-Protection", "1; mode=block")
-                    .putHeader("Access-Control-Allow-Origin", "*")
-                    .putHeader("Access-Control-Allow-Methods", "GET, POST")
-                    .putHeader("Access-Control-Allow-Headers", "X-Requested-With,content-type, Authorization")
-                    .putHeader("X-FRAME-OPTIONS", "DENY");
-
-            ctx.next();
-        });
-
+        router.route().handler(BodyHandler.create());
         //GET Operations
-
+ 
 		router.get("/Services/rest/blogs").handler(blogHandler::getBlogs);
 		router.post("/Services/rest/blogs").handler(blogHandler::storeBlog);
 		router.post("/Services/rest/blogs/:blogId/comments").handler(blogHandler::submitComment);
